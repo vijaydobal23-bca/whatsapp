@@ -6,6 +6,7 @@ import {
   generateRefreshToken,
 } from "../utils/generateToken.js";
 import { config } from "../config/config.js";
+import { uploadToImageKit } from "../services/imagekit.service.js";
 
 const setCookie = async (res, refreshToken, accessToken) => {
   res.cookie("refreshToken", refreshToken, {
@@ -145,7 +146,7 @@ export const getMe = async (req ,res)=>{
     res.status(500).json({message:error.message});
   }
 }
-
+ 
 
 export const refreshAccessToken = async (req ,res)=>{
   try {
@@ -168,6 +169,42 @@ export const refreshAccessToken = async (req ,res)=>{
     });
   } catch (error) {
     console.log("error in refreshAccessToken",error);
+    res.status(500).json({message:error.message});
+  }
+}
+
+export const updateProfile = async (req ,res)=>{
+  try {
+    const { username ,bio} = req.body;
+    const file = req.files.buffer;
+    if(!file){
+      return res.status(400).json({message:"Please provide a file"});
+    }
+
+    const profilePictureLink = await uploadToImageKit(file);
+
+    if(!profilePictureLink){
+      return res.status(500).json({message:"Error in uploading profile picture"});
+    }
+
+    const user = await userModel.findById(req.user.userId);
+    user.profilePicture = profilePictureLink;
+    user.username = username;
+    user.bio = bio;
+    await user.save();
+    
+    return res.status(200).json({
+      message:"Profile updated successfully",
+      user:{
+        _id:user._id,
+        username:user.username,
+        email:user.email,
+        profilePicture:user.profilePicture,
+        status:user.status,
+      }
+    });
+  } catch (error) {
+    console.log("error in updateProfile",error);
     res.status(500).json({message:error.message});
   }
 }

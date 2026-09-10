@@ -9,6 +9,8 @@ import {
 import { identifyUser } from "../middleware/auth.middleware.js";
 import { registerValidator,loginValidator} from "../validators/auth.validator.js";
 
+import upload from "../middleware/upload.middleware.js";
+
 const router = expres.Router();
 
 
@@ -21,5 +23,6 @@ router.post("/logout",identifyUser,logout);
 router.get("/get-me",identifyUser,getMe);
 
 router.post("/refreshAccessToken",identifyUser,refreshAccessToken);
+router.patch("/update-profile",identifyUser,(req,res)=>{}) 
 
 export default router;

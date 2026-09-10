@@ -40,7 +40,12 @@ const userSchema = new mongoose.Schema({
 
   refreshToken:{
     type:String,
-  } 
+  },
+
+  bio:{
+    type:String,
+    default:"Hey there! I'm using WhatsApp.",
+  },
 
 },{timestamps:true});
 
