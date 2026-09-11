@@ -5,6 +5,17 @@ import { emitToUser, getIO, getReceiverSocketIds } from "../socket/socket.js";
 import redis from "../redis/redis.js";
 import { uploadToImageKit } from "../services/imagekit.service.js";
 
+const deleteCache = async (pattern) => {
+  try {
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
+  } catch (err) {
+    console.log("Redis cache deletion error:", err);
+  }
+};
+
 const populateChat = (chatId) => {
   return chatModel
     .findById(chatId)
@@ -65,6 +76,11 @@ export const createChat = async (req, res) => {
       chat.lastMessage = message._id;
       chat.lastMessageAt = message.createdAt;
       await chat.save();
+
+      // Invalidate Redis cache
+      await deleteCache(`messages:${chat._id}:*`);
+      await deleteCache(`chats:${senderId}:*`);
+      await deleteCache(`chats:${receiverId}:*`);
 
       populatedMessage = await populateMessage(message._id);
     }
@@ -298,6 +314,11 @@ export const sendMediaMessage = async (req, res) => {
     chat.lastMessage = message._id;
     chat.lastMessageAt = message.createdAt;
     await chat.save();
+
+    // Invalidate Redis cache
+    await deleteCache(`messages:${chat._id}:*`);
+    await deleteCache(`chats:${senderId}:*`);
+    await deleteCache(`chats:${receiverId}:*`);
 
     const populatedMessage = await populateMessage(message._id);
     const populatedChat = await populateChat(chat._id);
