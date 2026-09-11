@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const contactsSchema = new mongoose.Schema({
   owner:{
     type:mongoose.Schema.Types.ObjectId,
-    ref:"User",
+    ref:"user",
     required:true
   },
   contactUser:{
     type:mongoose.Schema.Types.ObjectId,
-    ref:"User",
+    ref:"user",
     required:true
   }
 }, { timestamps: true });  

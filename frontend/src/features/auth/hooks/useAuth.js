@@ -44,6 +44,7 @@ export const useAuth = () => {
 
   return {
     user,
+    setUser,
     loading,
     error,
     clearError,

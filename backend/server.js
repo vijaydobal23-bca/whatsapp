@@ -7,7 +7,7 @@ import {connectDb} from "./src/config/db.js";
 
  
 
-const PORT = config.PORT;
+const PORT = config.PORT || 3000;
 connectDb();
 
 app.listen(PORT,()=>{

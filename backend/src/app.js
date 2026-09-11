@@ -10,15 +10,16 @@ import { initSocket } from "./socket/socket.js";
 
 const app = express();
 const server = http.createServer(app);
+const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 
 // initialize socket.io
-const io = initSocket(server);
+initSocket(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-  origin:"http://localhost:5173",
+  origin: clientOrigin,
   credentials:true
 }));
 

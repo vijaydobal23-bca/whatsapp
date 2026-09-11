@@ -1,1 +1,36 @@
 @import "tailwindcss";
+
+/* Custom Scrollbar Utilities */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+  }
+  .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: #374045;
+  }
+}
+
+/* Profile panel slide-in animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}

@@ -12,6 +12,7 @@ export const uploadToImageKit = async (file) => {
   try {
     const result = await imagekit.upload({
       file:file,
+      fileName: "profile.jpg",
       folder:"whatsapp/"
     });
     return result.url;

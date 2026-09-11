@@ -9,18 +9,20 @@ import { config } from "../config/config.js";
 import { uploadToImageKit } from "../services/imagekit.service.js";
 
 const setCookie = async (res, refreshToken, accessToken) => {
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.cookie("refreshToken", refreshToken, {
     maxAge: 15 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: "strict",
-    secure: true,
+    secure: isProduction,
   });
 
   res.cookie("accessToken", accessToken, {
     maxAge: 15 * 60 * 1000,
     httpOnly: true,
     sameSite: "strict",
-    secure: true,
+    secure: isProduction,
   });
 };
 
@@ -54,6 +56,8 @@ export const register = async (req, res) => {
         _id: newUser._id,
         username: newUser.username,
         email: newUser.email,
+        profilePicture: newUser.profilePicture,
+        bio: newUser.bio,
       },
     });
   } catch (error) {
@@ -95,6 +99,8 @@ export const login = async (req ,res)=>{
         _id:user._id,
         username:user.username,
         email:user.email,
+        profilePicture:user.profilePicture,
+        bio:user.bio,
       }
     });
   } catch (error) {
@@ -106,18 +112,20 @@ export const login = async (req ,res)=>{
 
 export const logout = async (req ,res)=>{
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("refreshToken", "",{
-      maxAge:15*24*60*60*1000,
+      maxAge:0,
       httpOnly:true,
       sameSite:"strict",
-      secure:true
+      secure:isProduction
     });
 
     res.cookie("accessToken", "",{
-      maxAge:15*60*1000,
+      maxAge:0,
       httpOnly:true,
       sameSite:"strict",
-      secure:true,
+      secure:isProduction,
     });
     
     return res.status(200).json({message:"User logged out successfully"});
@@ -130,13 +138,14 @@ export const logout = async (req ,res)=>{
 
 export const getMe = async (req ,res)=>{
   try {
-    const user = await userModel.findById(req.user.userId).select("-password");
+    const user = await userModel.findById(req.user._id).select("-password");
     return res.status(200).json({
       user:{
         _id:user._id, 
         username:user.username,
         email:user.email,
         profilePicture:user.profilePicture,
+        bio:user.bio,
         status:user.status,
         lastSeen:user.lastSeen,
       }
@@ -176,21 +185,23 @@ export const refreshAccessToken = async (req ,res)=>{
 export const updateProfile = async (req ,res)=>{
   try {
     const { username ,bio} = req.body;
-    const file = req.files.buffer;
-    if(!file){
-      return res.status(400).json({message:"Please provide a file"});
+    const user = await userModel.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const profilePictureLink = await uploadToImageKit(file);
-
-    if(!profilePictureLink){
-      return res.status(500).json({message:"Error in uploading profile picture"});
+    // Upload profile picture if provided
+    if (req.file) {
+      const profilePictureLink = await uploadToImageKit(req.file.buffer);
+      if (!profilePictureLink) {
+        return res.status(500).json({ message: "Error in uploading profile picture" });
+      }
+      user.profilePicture = profilePictureLink;
     }
 
-    const user = await userModel.findById(req.user.userId);
-    user.profilePicture = profilePictureLink;
-    user.username = username;
-    user.bio = bio;
+    if (username) user.username = username;
+    if (bio !== undefined) user.bio = bio;
     await user.save();
     
     return res.status(200).json({
@@ -200,6 +211,7 @@ export const updateProfile = async (req ,res)=>{
         username:user.username,
         email:user.email,
         profilePicture:user.profilePicture,
+        bio:user.bio,
         status:user.status,
       }
     });

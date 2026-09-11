@@ -16,6 +16,7 @@ export const identifyUser = async(req, res, next)=>{
     }
 
     req.user = user;
+    res.locals.user = user;
     next();
   }catch(err){
     console.log("error in identifyUser",err);
