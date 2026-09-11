@@ -24,7 +24,7 @@ const LoginPage = () => {
       </div>
 
       {/* heading */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-10">Login</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 sm:mb-10">Login</h1>
 
       {/* card */}
       <div className="w-full max-w-sm space-y-5">

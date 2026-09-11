@@ -43,7 +43,7 @@ const Sidebar = ({
   };
 
   return (
-    <div className="relative overflow-hidden w-[420px] min-w-[320px] h-full flex flex-col bg-[#111b21] border-r border-[#222d34]">
+    <div className={`relative overflow-hidden h-full flex-col bg-[#111b21] border-r border-[#222d34] w-full md:w-[420px] md:min-w-[320px] ${selectedChat ? "hidden md:flex" : "flex"}`}>
       {/* Header */}
       <div className="h-[60px] px-4 flex items-center justify-between bg-[#202c33]">
         {/* User avatar */}

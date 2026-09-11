@@ -1,6 +1,6 @@
 const EmptyChatArea = () => {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-[#222e35] border-b-[6px] border-[#00a884]">
+    <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-[#222e35] border-b-[6px] border-[#00a884]">
       {/* Lock icon + illustration area */}
       <div className="flex flex-col items-center max-w-[560px] text-center">
         {/* WhatsApp Web illustration */}
