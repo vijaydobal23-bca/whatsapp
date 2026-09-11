@@ -1,8 +1,12 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
-import LoginPage from "../features/auth/pages/LoginPage.jsx";
-import RegisterPage from "../features/auth/pages/RegisterPage.jsx";
-import HomePage from "../features/home/pages/HomePage.jsx";
-import Protected from "../features/auth/components/Protected.jsx";
+import { lazy, Suspense } from "react";
+const LoginPage = lazy(() => import("../features/auth/pages/LoginPage.jsx"));
+const RegisterPage = lazy(() => import("../features/auth/pages/RegisterPage.jsx"));
+const HomePage = lazy(() => import("../features/home/pages/HomePage.jsx"));
+const Protected = lazy(() => import("../features/auth/components/Protected.jsx"));
+
+import ErrorBoundary from "./ErrorBoundary.jsx";
+
 import { AuthContextProvider } from "../features/auth/auth.context.jsx";
 import { HomeContextProvider } from "../features/home/homeContext.jsx";
 import { SocketContextProvider } from "../context/SocketContext.jsx";
@@ -26,18 +30,26 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: (
-          <Protected>
-            <HomePage />
-          </Protected>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Protected>
+              <ErrorBoundary>
+                <HomePage />
+              </ErrorBoundary>
+            </Protected>
+          </Suspense>
         ),
       },
       {
         path: "/login",
-        element: <LoginPage />,
+        element: <Suspense fallback={<div>Loading...</div>}>
+            <LoginPage />
+          </Suspense>
       },
       {
         path: "/register",
-        element: <RegisterPage />,
+        element: <Suspense fallback={<div>Loading...</div>}>
+            <RegisterPage />
+          </Suspense>
       },
       {
         path: "*",
