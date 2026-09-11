@@ -9,6 +9,7 @@ import {
   sendMessage as sendMessageApi,
   removeContact as removeContactApi,
   updateProfile as updateProfileApi,
+  sendMediaMessage as sendMediaMessageApi,
 } from "../api/home.api.js";
 import { useAuth } from "../../auth/hooks/useAuth.js";
 import { useSocket } from "../../../context/socket.context.js";
@@ -399,6 +400,35 @@ export const useHome = () => {
     }
   };
 
+  const handleFileUpload = async (file, receiverId) => {
+    try {
+      if (!file || !receiverId) return;
+
+      const formData = new FormData();
+      formData.append("media", file);
+      formData.append("receiverId", receiverId);
+
+      const response = await sendMediaMessageApi(formData);
+
+      if (response?.chat) {
+        upsertChat(response.chat);
+        if (selectedChat?.isNewChat) {
+          setSelectedChat(response.chat);
+        }
+      }
+
+      if (response?.sentMessage) {
+        appendMessage(response.sentMessage);
+      } else if (response?.chat?._id) {
+        await fetchMessages(response.chat._id);
+      }
+
+      return response;
+    } catch (err) {
+      console.log("error in handleFileUpload", err);
+    }
+  };
+
   return {
     user,
     chats,
@@ -416,6 +446,7 @@ export const useHome = () => {
     searchForUsers,
     fetchMessages,
     handleSendMessage,
+    handleFileUpload,
     selectChat,
     setSelectedChat,
     getOtherParticipant,

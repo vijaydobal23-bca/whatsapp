@@ -21,6 +21,7 @@ const HomePage = () => {
     addContact,
     searchForUsers,
     handleSendMessage,
+    handleFileUpload,
     selectChat,
     setSelectedChat,
     getOtherParticipant,
@@ -77,6 +78,7 @@ const HomePage = () => {
           setSelectedChat={setSelectedChat}
           getOtherParticipant={getOtherParticipant}
           handleSendMessage={handleSendMessage}
+          handleFileUpload={handleFileUpload}
           fetchMessages={fetchMessages}
           onlineUsers={onlineUsers}
         />

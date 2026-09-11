@@ -1,14 +1,27 @@
 import storyModel from "../models/status.model.js";
 import contactModel from "../models/contact.model.js";
+import { uploadToImageKit } from "../services/imagekit.service.js";
 
 // Add a new status/story
 export const addStatus = async(req, res) => {
   try {
     const userId = req.user._id;
-    const { mediaUrl, mediaType } = req.body;
 
-    if(!mediaUrl || !mediaType) {
-      return res.status(400).json({ success: false, message: "mediaUrl and mediaType are required" });
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Media file is required" });
+    }
+
+    // Upload to ImageKit
+    const mediaUrl = await uploadToImageKit(req.file.buffer);
+    if (!mediaUrl) {
+      return res.status(500).json({ success: false, message: "Failed to upload media" });
+    }
+
+    // Determine media type from MIME
+    const mime = req.file.mimetype || "";
+    let mediaType = "image";
+    if (mime.startsWith("video/")) {
+      mediaType = "video";
     }
 
     const status = await storyModel.create({
@@ -17,7 +30,10 @@ export const addStatus = async(req, res) => {
       mediaType
     });
 
-    return res.status(201).json({ success: true, message: "status added successfully", status });
+    const populatedStatus = await storyModel.findById(status._id)
+      .populate("user", "_id username profilePicture");
+
+    return res.status(201).json({ success: true, message: "status added successfully", status: populatedStatus });
   } catch (error) {
     console.log("Error in addStatus:", error);
     return res.status(500).json({ success: false, message: "error adding status" });

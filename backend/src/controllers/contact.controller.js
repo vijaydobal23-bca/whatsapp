@@ -1,5 +1,6 @@
 import contactModel from "../models/contact.model.js";
 import userModel from "../models/user.model.js";
+import redis from "../redis/redis.js";
 
 export const addToContact = async (req, res) => {
   try {
@@ -31,6 +32,9 @@ export const addToContact = async (req, res) => {
       contactUser: contactId,
     });
 
+    // Invalidate the cached contacts
+    await redis.del(`contacts:${userId}`);
+
     return res.status(201).json({
       message: "Contact added successfully",
       contact,
@@ -45,9 +49,21 @@ export const getMyContacts = async (req, res) => {
   try {
     const userId = req.user._id;
 
+    // Check cache
+    const cachedContacts = await redis.get(`contacts:${userId}`);
+    if (cachedContacts) {
+      return res.status(200).json({
+        message: "Contacts fetched successfully",
+        contacts: JSON.parse(cachedContacts),
+      });
+    }
+
     const contacts = await contactModel
       .find({ owner: userId })
       .populate("contactUser", "username email profilePicture status bio lastSeen");
+
+    // Set cache (expire after 1 hour)
+    await redis.set(`contacts:${userId}`, JSON.stringify(contacts), { EX: 3600 });
 
     return res.status(200).json({
       message: "Contacts fetched successfully",
@@ -74,6 +90,10 @@ export const removeContact = async (req, res) => {
     }
 
     await contactModel.deleteOne({ owner: userId, contactUser: contactId });
+    
+    // Invalidate the cached contacts
+    await redis.del(`contacts:${userId}`);
+
     return res.status(200).json({ message: "Contact removed successfully" });
   } catch (err) {
     console.log("error in removeContact", err);

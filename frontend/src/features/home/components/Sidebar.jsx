@@ -3,6 +3,7 @@ import ChatListItem from "./ChatListItem";
 import SearchBar from "./SearchBar";
 import ContactListItem from "./ContactListItem";
 import SearchResultItem from "./SearchResultItem";
+import StatusSidebar from "./StatusSidebar";
 
 const Sidebar = ({
   user,
@@ -26,6 +27,7 @@ const Sidebar = ({
   socketConnected,
 }) => {
   const [showSearch, setShowSearch] = useState(false);
+  const [showStatus, setShowStatus] = useState(false);
 
   useEffect(() => {
     fetchAllChats();
@@ -41,7 +43,7 @@ const Sidebar = ({
   };
 
   return (
-    <div className="w-[420px] min-w-[320px] h-full flex flex-col bg-[#111b21] border-r border-[#222d34]">
+    <div className="relative overflow-hidden w-[420px] min-w-[320px] h-full flex flex-col bg-[#111b21] border-r border-[#222d34]">
       {/* Header */}
       <div className="h-[60px] px-4 flex items-center justify-between bg-[#202c33]">
         {/* User avatar */}
@@ -88,20 +90,40 @@ const Sidebar = ({
 
         {/* Header icons */}
         <div className="flex items-center gap-2">
+          {/* Status */}
+          <button
+            onClick={() => setShowStatus(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors"
+            title="Status"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="w-[22px] h-[22px] fill-[#aebac1]"
+            >
+              <path d="M12 20.664a9.163 9.163 0 0 1-6.521-2.702.977.977 0 0 1 1.381-1.381 7.269 7.269 0 0 0 10.024.244.977.977 0 0 1 1.313 1.445A9.192 9.192 0 0 1 12 20.664zm7.965-6.112a.977.977 0 0 1-.944-1.229 7.26 7.26 0 0 0-4.8-8.804.977.977 0 0 1 .594-1.86 9.212 9.212 0 0 1 6.092 11.169.976.976 0 0 1-.942.724zm-16.025-.39a.977.977 0 0 1-.953-.769 9.21 9.21 0 0 1 6.626-10.86.977.977 0 1 1 .444 1.897 7.259 7.259 0 0 0-5.141 8.53.977.977 0 0 1-.976 1.202z" />
+            </svg>
+          </button>
+
           {/* New chat / search */}
           <button
             onClick={() => setShowSearch(!showSearch)}
             className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors"
             title="New chat"
           >
-            <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] fill-[#aebac1]">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-[22px] h-[22px] fill-[#aebac1]"
+            >
               <path d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821c-.001-1.032-1.032-1.646-2.064-1.646zm-4.989 9.869H7.041V11.1h6.975v1.944zm3-4H7.041V7.1h9.975v1.944z" />
             </svg>
           </button>
 
           {/* Menu */}
           <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors">
-            <svg viewBox="0 0 24 24" className="w-[22px] h-[22px] fill-[#aebac1]">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-[22px] h-[22px] fill-[#aebac1]"
+            >
               <path d="M12 7a2 2 0 1 0-.001-4.001A2 2 0 0 0 12 7zm0 2a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 9zm0 6a2 2 0 1 0-.001 3.999A2 2 0 0 0 12 15z" />
             </svg>
           </button>
@@ -191,39 +213,47 @@ const Sidebar = ({
               </p>
             </div>
           )
+        ) : /* Contact List */
+        loading && contacts.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-2 border-[#00a884] border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : contacts.length > 0 ? (
+          contacts.map((contact) => {
+            const isOnline = onlineUsers?.includes(
+              contact.contactUser?._id || contact._id,
+            );
+            return (
+              <ContactListItem
+                key={contact._id}
+                contact={contact}
+                onSelect={selectChat}
+                currentUser={user}
+                isOnline={isOnline}
+              />
+            );
+          })
         ) : (
-          /* Contact List */
-          loading && contacts.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-2 border-[#00a884] border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center justify-center py-16 px-8">
+            <div className="w-16 h-16 rounded-full bg-[#202c33] flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" className="w-8 h-8 fill-[#8696a0]">
+                <path d="M15.5 12c2.5 0 7.5 1.25 7.5 3.75V18H8v-2.25C8 13.25 13 12 15.5 12zM5 9.5a3 3 0 100-6 3 3 0 000 6zm10.5 0a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM5 11c-2.33 0-7 1.17-7 3.5V17h7v-2.25c0-.85.33-2.34 2.37-3.47C6.5 11.1 5.67 11 5 11z" />
+              </svg>
             </div>
-          ) : contacts.length > 0 ? (
-            contacts.map((contact) => {
-              const isOnline = onlineUsers?.includes(contact.contactUser?._id || contact._id);
-              return (
-                <ContactListItem
-                  key={contact._id}
-                  contact={contact}
-                  onSelect={selectChat}
-                  currentUser={user}
-                  isOnline={isOnline}
-                />
-              );
-            })
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 px-8">
-              <div className="w-16 h-16 rounded-full bg-[#202c33] flex items-center justify-center mb-4">
-                <svg viewBox="0 0 24 24" className="w-8 h-8 fill-[#8696a0]">
-                  <path d="M15.5 12c2.5 0 7.5 1.25 7.5 3.75V18H8v-2.25C8 13.25 13 12 15.5 12zM5 9.5a3 3 0 100-6 3 3 0 000 6zm10.5 0a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM5 11c-2.33 0-7 1.17-7 3.5V17h7v-2.25c0-.85.33-2.34 2.37-3.47C6.5 11.1 5.67 11 5 11z" />
-                </svg>
-              </div>
-              <p className="text-[#8696a0] text-sm text-center">
-                No contacts yet. Search and add contacts!
-              </p>
-            </div>
-          )
+            <p className="text-[#8696a0] text-sm text-center">
+              No contacts yet. Search and add contacts!
+            </p>
+          </div>
         )}
       </div>
+
+      {/* Status Overlay */}
+      {showStatus && (
+        <StatusSidebar
+          onClose={() => setShowStatus(false)}
+          currentUser={user}
+        />
+      )}
     </div>
   );
 };

@@ -115,3 +115,61 @@ export const updateProfile = async (formData) => {
   }
 };
 
+// Send a media message (image/video/file) via multipart form
+export const sendMediaMessage = async (formData) => {
+  try {
+    const response = await axiosInstance.post("/api/chat/send-media", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("error in sendMediaMessage api", error);
+    throw error;
+  }
+};
+
+// Upload a new status (image/video)
+export const uploadStatus = async (formData) => {
+  try {
+    const response = await axiosInstance.post("/api/status/add", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (err) {
+    console.log("error in uploadStatus api", err);
+    throw err;
+  }
+};
+
+// Mark a status as watched
+export const watchStatus = async (statusId) => {
+  try {
+    const response = await axiosInstance.post(`/api/status/watch/${statusId}`);
+    return response.data;
+  } catch (err) {
+    console.log("error in watchStatus api", err);
+    throw err;
+  }
+};
+
+// Get my own statuses
+export const getMyStatus = async () => {
+  try {
+    const response = await axiosInstance.get("/api/status/my-status");
+    return response.data;
+  } catch (err) {
+    console.log("error in getMyStatus api", err);
+    throw err;
+  }
+};
+
+// Get statuses of contacts
+export const getContactsStatuses = async () => {
+  try {
+    const response = await axiosInstance.get("/api/status/contacts");
+    return response.data;
+  } catch (err) {
+    console.log("error in getContactsStatuses api", err);
+    throw err;
+  }
+};
