@@ -6,6 +6,7 @@ import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
 import chatRouter from "./routes/chat.routes.js";
 import contactRouter from "./routes/contact.routes.js";
+import storyRouter from "./routes/story.routes.js";
 import { initSocket } from "./socket/socket.js";
 
 const app = express();
@@ -30,5 +31,6 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/contact", contactRouter);
+app.use("/api/story", storyRouter);
 
 export default server;
