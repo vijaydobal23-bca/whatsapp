@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble";
 import { formatChatTime } from "../utils/formatTime";
+import { useCalling } from "../../calling/hooks/useCalling";
 
 const ChatArea = ({
   user,
@@ -13,6 +14,7 @@ const ChatArea = ({
   fetchMessages,
   onlineUsers,
 }) => {
+  const { startCall } = useCalling();
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const [media, setMedia] = useState(null);
@@ -185,7 +187,10 @@ const ChatArea = ({
         {/* Header action icons */}
         <div className="flex items-center gap-1">
           {/* Video call */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors">
+          <button 
+            onClick={() => startCall(otherUser?._id, 'video', otherUser?.username, otherUser?.profilePicture)}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors"
+          >
             <svg
               viewBox="0 0 24 24"
               className="w-[22px] h-[22px] fill-[#aebac1]"
@@ -195,7 +200,10 @@ const ChatArea = ({
           </button>
 
           {/* Voice call */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors">
+          <button 
+            onClick={() => startCall(otherUser?._id, 'audio', otherUser?.username, otherUser?.profilePicture)}
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#374045] transition-colors"
+          >
             <svg
               viewBox="0 0 24 24"
               className="w-[22px] h-[22px] fill-[#aebac1]"

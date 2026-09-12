@@ -5,10 +5,22 @@ import chatModel from "../models/chat.models.js";
 import contactModel from "../models/contact.model.js";
 import userModel from "../models/user.model.js";
 import { config } from "../config/config.js";
+import redis from "../redis/redis.js";
 
 // track online users: userId -> Set<socketId>
 const onlineUsers = new Map();
 let ioInstance = null;
+
+const deleteCache = async (pattern) => {
+  try {
+    const keys = await redis.keys(pattern);
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
+  } catch (err) {
+    console.log("Redis cache deletion error:", err);
+  }
+};
 
 const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 
@@ -219,6 +231,11 @@ export const initSocket = (server) => {
         chat.lastMessageAt = message.createdAt;
         await chat.save();
 
+        // Invalidate Redis cache
+        await deleteCache(`messages:${chat._id}:*`);
+        await deleteCache(`chats:${senderId}:*`);
+        await deleteCache(`chats:${receiverId}:*`);
+
         // populate sender info for the frontend
         const populatedMessage = await Message.findById(message._id)
           .populate("senderId", "username profilePicture")
@@ -258,9 +275,13 @@ export const initSocket = (server) => {
           { $set: { messageStatus: "read" } }
         );
 
-        // notify the sender that their messages were read
+        // Invalidate Redis cache
+        await deleteCache(`messages:${chatId}:*`);
         const chat = await chatModel.findById(chatId);
         if (chat) {
+          await deleteCache(`chats:${chat.participants[0]}:*`);
+          await deleteCache(`chats:${chat.participants[1]}:*`);
+          
           const otherParticipant = chat.participants.find(
             (p) => p.toString() !== userId
           );
@@ -278,6 +299,11 @@ export const initSocket = (server) => {
       try {
         const message = await Message.findByIdAndDelete(messageId);
         if (message) {
+          // Invalidate Redis cache
+          await deleteCache(`messages:${message.chatId}:*`);
+          await deleteCache(`chats:${message.senderId}:*`);
+          await deleteCache(`chats:${message.receiverId}:*`);
+
           emitToUser(io, receiverId, "messageDeleted", { messageId });
           socket.emit("messageDeleted", { messageId });
         }
@@ -302,7 +328,52 @@ export const initSocket = (server) => {
         io.emit("getOnlineUsers", getOnlineUserIds());
       }
     });
+
+
+    // ---- CALLING (WebRTC + Socket.IO) ----
+    socket.on("startCall", ({ recipientId, callType, offer }) => {
+      const recipientSocketId = getReceiverSocketId(recipientId);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("incomingCall", { 
+          callerId: userId, 
+          callType, 
+          offer 
+        });
+      } else {
+        // User offline
+        socket.emit("callRejected", { calleeId: recipientId, reason: "offline" });
+      }
+    });
+
+    socket.on("callAccepted", ({ callerId, answer }) => {
+      const callerSocketId = getReceiverSocketId(callerId);
+      if (callerSocketId) {
+        io.to(callerSocketId).emit("callAccepted", { calleeId: userId, answer });
+      }
+    });
+
+    socket.on("callRejected", ({ callerId }) => {
+      const callerSocketId = getReceiverSocketId(callerId);
+      if (callerSocketId) {
+        io.to(callerSocketId).emit("callRejected", { calleeId: userId, reason: "rejected" });
+      }
+    });
+
+    socket.on("iceCandidate", ({ targetId, candidate }) => {
+      const targetSocketId = getReceiverSocketId(targetId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("iceCandidate", { senderId: userId, candidate });
+      }
+    });
+
+    socket.on("endCall", ({ targetId }) => {
+      const targetSocketId = getReceiverSocketId(targetId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("endCall", { senderId: userId });
+      }
+    });
   });
+  
 
   return io;
 };

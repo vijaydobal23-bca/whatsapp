@@ -11,13 +11,19 @@ import { AuthContextProvider } from "../features/auth/auth.context.jsx";
 import { HomeContextProvider } from "../features/home/homeContext.jsx";
 import { SocketContextProvider } from "../context/SocketContext.jsx";
 
+import { CallContextProvider } from "../features/calling/call.context.jsx";
+import CallingInterface from "../features/calling/components/CallingInterface.jsx";
+
 const RootLayout = () => {
   return (
     <AuthContextProvider>
       <SocketContextProvider>
-        <HomeContextProvider>
-          <Outlet />
-        </HomeContextProvider>
+        <CallContextProvider>
+          <HomeContextProvider>
+            <Outlet />
+            <CallingInterface />
+          </HomeContextProvider>
+        </CallContextProvider>
       </SocketContextProvider>
     </AuthContextProvider>
   );

@@ -191,8 +191,8 @@ export const getChatMessages = async (req, res) => {
   try {
     const { chatId } = req.params;
 
-    const limit = Number(req.query.limit) || 10;
-    const skip = Number(req.query.skip) || 0;
+    const limit = req.query.limit !== undefined ? Number(req.query.limit) : 0; // 0 means all messages
+    const skip = req.query.skip !== undefined ? Number(req.query.skip) : 0;
 
     const cacheKey = `messages:${chatId}:${limit}:${skip}`;
 
@@ -218,9 +218,12 @@ export const getChatMessages = async (req, res) => {
         "senderId",
         "username email profilePicture status bio lastSeen"
       )
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);
+
+    // Reverse to maintain chronological order for the frontend
+    messages = messages.reverse();
 
     // Store in Redis for 1 day
     await redis.set(
