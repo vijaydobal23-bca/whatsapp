@@ -14,14 +14,14 @@ const setCookie = async (res, refreshToken, accessToken) => {
   res.cookie("refreshToken", refreshToken, {
     maxAge: 15 * 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: isProduction ? "none" : "strict",
     secure: isProduction,
   });
 
   res.cookie("accessToken", accessToken, {
     maxAge: 15 * 60 * 1000,
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: isProduction ? "none" : "strict",
     secure: isProduction,
   });
 };
@@ -117,14 +117,14 @@ export const logout = async (req ,res)=>{
     res.cookie("refreshToken", "",{
       maxAge:0,
       httpOnly:true,
-      sameSite:"strict",
+      sameSite: isProduction ? "none" : "strict",
       secure:isProduction
     });
 
     res.cookie("accessToken", "",{
       maxAge:0,
       httpOnly:true,
-      sameSite:"strict",
+      sameSite: isProduction ? "none" : "strict",
       secure:isProduction,
     });
     
