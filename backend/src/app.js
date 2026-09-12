@@ -13,7 +13,10 @@ import { initSocket } from "./socket/socket.js";
 
 const app = express();
 const server = http.createServer(app);
-const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const clientOrigin = [
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "https://whatsapp-chi-mocha.vercel.app"
+];
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,

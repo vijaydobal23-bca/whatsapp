@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "../features/auth/hooks/useAuth";
 import { SocketContext } from "./socket.context.js";
 
-const socketUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const socketUrl = import.meta.env.VITE_BACKEND_URL || "https://whatsapp-djq6.onrender.com";
 
 export const SocketContextProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);

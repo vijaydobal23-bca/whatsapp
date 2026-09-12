@@ -22,7 +22,10 @@ const deleteCache = async (pattern) => {
   }
 };
 
-const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const clientOrigin = [
+  process.env.CLIENT_URL || "http://localhost:5173",
+  "https://whatsapp-chi-mocha.vercel.app"
+];
 
 const normalizeId = (id) => id?.toString();
 

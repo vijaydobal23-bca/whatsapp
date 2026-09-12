@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiCalling = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://whatsapp-djq6.onrender.com",
   withCredentials: true,
 });
 
