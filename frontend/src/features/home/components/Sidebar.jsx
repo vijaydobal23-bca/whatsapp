@@ -4,6 +4,8 @@ import SearchBar from "./SearchBar";
 import ContactListItem from "./ContactListItem";
 import SearchResultItem from "./SearchResultItem";
 import StatusSidebar from "./StatusSidebar";
+import CallHistory from "../../calling/components/CallHistory";
+import { useCalling } from "../../calling/hooks/useCalling";
 
 const Sidebar = ({
   user,
@@ -28,6 +30,7 @@ const Sidebar = ({
 }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
+  const { startCall } = useCalling();
 
   useEffect(() => {
     fetchAllChats();
@@ -141,7 +144,7 @@ const Sidebar = ({
 
       {/* Tabs - All, Unread, Favourites, Groups */}
       <div className="flex items-center gap-1.5 px-3 py-2">
-        {["chats", "contacts"].map((tab) => (
+        {["chats", "contacts", "calls"].map((tab) => (
           <button
             key={tab}
             onClick={() => setSidebarTab(tab)}
@@ -189,7 +192,7 @@ const Sidebar = ({
           ) : chats.length > 0 ? (
             chats.map((chat) => {
               const otherUser = getOtherParticipant(chat);
-              const isOnline = onlineUsers?.includes(otherUser?._id);
+              const isOnline = onlineUsers?.includes(String(otherUser?._id));
 
               return (
                 <ChatListItem
@@ -215,37 +218,42 @@ const Sidebar = ({
               </p>
             </div>
           )
-        ) : /* Contact List */
-        loading && contacts.length === 0 ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-[#00a884] border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : contacts.length > 0 ? (
-          contacts.map((contact) => {
-            const isOnline = onlineUsers?.includes(
-              contact.contactUser?._id || contact._id,
-            );
-            return (
-              <ContactListItem
-                key={contact._id}
-                contact={contact}
-                onSelect={selectChat}
-                currentUser={user}
-                isOnline={isOnline}
-              />
-            );
-          })
-        ) : (
-          <div className="flex flex-col items-center justify-center py-16 px-8">
-            <div className="w-16 h-16 rounded-full bg-[#202c33] flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" className="w-8 h-8 fill-[#8696a0]">
-                <path d="M15.5 12c2.5 0 7.5 1.25 7.5 3.75V18H8v-2.25C8 13.25 13 12 15.5 12zM5 9.5a3 3 0 100-6 3 3 0 000 6zm10.5 0a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM5 11c-2.33 0-7 1.17-7 3.5V17h7v-2.25c0-.85.33-2.34 2.37-3.47C6.5 11.1 5.67 11 5 11z" />
-              </svg>
+        ) : sidebarTab === "contacts" ? (
+          /* Contact List */
+          loading && contacts.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-2 border-[#00a884] border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="text-[#8696a0] text-sm text-center">
-              No contacts yet. Search and add contacts!
-            </p>
-          </div>
+          ) : contacts.length > 0 ? (
+            contacts.map((contact) => {
+              const isOnline = onlineUsers?.includes(
+                String(contact.contactUser?._id || contact._id),
+              );
+              return (
+                <ContactListItem
+                  key={contact._id}
+                  contact={contact}
+                  onSelect={selectChat}
+                  currentUser={user}
+                  isOnline={isOnline}
+                />
+              );
+            })
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 px-8">
+              <div className="w-16 h-16 rounded-full bg-[#202c33] flex items-center justify-center mb-4">
+                <svg viewBox="0 0 24 24" className="w-8 h-8 fill-[#8696a0]">
+                  <path d="M15.5 12c2.5 0 7.5 1.25 7.5 3.75V18H8v-2.25C8 13.25 13 12 15.5 12zM5 9.5a3 3 0 100-6 3 3 0 000 6zm10.5 0a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM5 11c-2.33 0-7 1.17-7 3.5V17h7v-2.25c0-.85.33-2.34 2.37-3.47C6.5 11.1 5.67 11 5 11z" />
+                </svg>
+              </div>
+              <p className="text-[#8696a0] text-sm text-center">
+                No contacts yet. Search and add contacts!
+              </p>
+            </div>
+          )
+        ) : (
+          /* Call History */
+          <CallHistory onCallBack={startCall} />
         )}
       </div>
 

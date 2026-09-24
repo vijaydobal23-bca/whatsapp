@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://whatsapp-djq6.onrender.com";
+
 const axiosInstance = axios.create({
-  baseURL: "https://whatsapp-djq6.onrender.com/api",
+  baseURL: `${backendUrl}/api`,
   withCredentials: true,
 });
 

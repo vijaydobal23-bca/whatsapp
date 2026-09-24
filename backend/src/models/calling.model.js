@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
-import { type } from "node:os";
-const callingSchame = new mongoose.Schema({
+
+const callingSchema = new mongoose.Schema({
   callerId:{
     type:mongoose.Schema.Types.ObjectId,
-    ref:"User"
+    ref:"user"
   },
   recipientId:{
     type:mongoose.Schema.Types.ObjectId,
-    ref:"User"
+    ref:"user"
   },
 
   callType:{
@@ -29,4 +29,4 @@ const callingSchame = new mongoose.Schema({
   timestamps:true
 })
 
-export const callingModel = mongoose.model("Calling",callingSchame);
+export const callingModel = mongoose.model("Calling",callingSchema);

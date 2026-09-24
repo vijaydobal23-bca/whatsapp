@@ -23,7 +23,7 @@ const ChatArea = ({
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const otherUser = getOtherParticipant(selectedChat);
-  const isOtherUserOnline = onlineUsers?.includes(otherUser?._id);
+  const isOtherUserOnline = onlineUsers?.includes(String(otherUser?._id));
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
